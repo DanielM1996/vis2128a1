@@ -9,22 +9,88 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Loading Packages
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Installation of essential packages necessary for the visualization and manipulation of Washington D.C.'s data.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r load packages, message=FALSE}
+library(sf)
+library(tidyverse)
+library(ggthemes)
+library(ggspatial)
 ```
 
-## Including Plots
+## Loading Datasets
 
-You can also embed plots, for example:
+Installation of three data sets based in Washington D.C. The three data sets represent:
+  1. *Urban Tree Canopy by Landuse* examining green spaces in Washington D.C.
+  2. *Bike Trails* focusing on park areas and paths along the National Mall.
+  3. *Potential Landmarks* representing historically significant structures.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r load datasets}
+Landmarks <- st_read("Potential_Landmarks.geojson", quiet = TRUE)
+
+Trails <- st_read("Bike_Trails.geojson", quiet = TRUE)
+
+Canopy <- st_read("Urban_Tree_Canopy_by_2015_Landuse.geojson", quiet = TRUE)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Basic Plot Lines
+
+```{r}
+Landmarks_plot <- ggplot(Landmarks) +
+  geom_sf(size = 0.35)
+Trails_plot <- ggplot(Trails) +
+  geom_sf()
+
+Landmarks_plot
+Trails_plot
+```
+## Aesthetics
+
+```{r}
+
+  ggplot() +
+  geom_sf(data = Canopy, color = NA, size = 0.01,
+          aes(fill = "Tree Canopy")) +
+  geom_sf(data = Landmarks, color = "black", 
+          aes(fill = "Potential Landmarks")) +
+  geom_sf(data = Trails) +
+  scale_fill_manual(values = c("red4", "green4"), name = "") +
+  theme_map() +
+  ggtitle("Bike Routes around Washington D.C.")
+
+```
+## Open Source Maps
+
+```{r, results='hide'}
+ggplot(Trails) +
+  annotation_map_tile (zoomin = 0, progress = "none") +
+    geom_sf() +
+    labs(caption = "Map tiles and data by OpenStreetMap")
+```
+## Gotham City by Bike
+
+```{r, results='hide'}
+ggplot() +
+  annotation_map_tile(zoomin = 10, progress = "none", type = "cartodark") +
+    geom_sf(data = Trails, color = "yellow") +
+    geom_sf(data = Landmarks, fill = "yellow", color = "yellow") +
+    labs(caption = "Map tiles and data by OpenStreetMap") 
+ 
+```
+## Celebrating Vexillology
+
+This map utilizes the polygons in questions and transforms them into a symbolic representation of the flag of Washington D.C. The origin and design can be viewed in this link: https://usflags.design/washington-dc/
+
+```{r}
+ggplot() +
+  geom_sf(data = Canopy, color = NA, size = 0.01,
+          aes(fill = "Tree Canopy")) +
+  geom_sf(data = Landmarks, color = "gray", 
+          aes(fill = "Bike Routes to Potential Landmarks")) +
+  geom_sf(data = Trails, color = "red2") +
+  scale_fill_manual(values = c("red2", "white"), name = "")
+
+```
+
